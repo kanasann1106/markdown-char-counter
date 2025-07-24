@@ -4,7 +4,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>マークダウン文字数カウントツール</title>
+    <meta name="description" content="マークダウン記法をレンダリング後の正確な文字数でカウントする無料ツール。リアルタイムプレビュー機能付きで、記事作成やブログ執筆に最適。">
+    <meta name="keywords" content="マークダウン,文字数カウント,Markdown,文字数計算,ブログ,記事作成,無料,リアルタイム">
+    <meta name="author" content="Markdown Character Counter">
+
+    <!-- Open Graph タグ -->
+    <meta property="og:title" content="マークダウン文字数カウントツール">
+    <meta property="og:description" content="マークダウン記法をレンダリング後の正確な文字数でカウントするツール。リアルタイムプレビュー機能付き。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://kanasann1106.github.io/markdown-char-counter/">
+    <meta property="og:site_name" content="マークダウン文字数カウントツール">
+    <meta property="og:locale" content="ja_JP">
+
+    <!-- Twitter Card タグ -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="マークダウン文字数カウントツール">
+    <meta name="twitter:description" content="マークダウンをレンダリング後の正確な文字数でカウント。無料ツール。">
+
+    <!-- 正規URL -->
+    <link rel="canonical" href="https://kanasann1106.github.io/markdown-char-counter/">
+
+    <!-- favicon（将来の追加用） -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+    <!-- robots meta -->
+    <meta name="robots" content="index, follow">
+
+    <!-- 追加のSEOメタタグ -->
+    <meta name="theme-color" content="#667eea">
+    <meta name="msapplication-TileColor" content="#667eea">
+    <meta name="google-site-verification" content="">
+
+    <!-- パフォーマンス最適化 -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+
     <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -16,30 +52,34 @@
             <p>マークダウンをレンダリング後の文字数を正確にカウントします</p>
         </header>
 
-        <div class="stats-header">
-            <div class="stat-group">
-                <h3 class="stat-group-title">📝 入力文字数</h3>
-                <div class="stat-line">
-                    入力文字数：<span class="stat-number" id="raw-count">0</span>文字
+        <nav aria-label="統計情報">
+            <div class="stats-header">
+                <div class="stat-group">
+                    <h3 class="stat-group-title">📝 入力文字数</h3>
+                    <div class="stat-line">
+                        入力文字数：<span class="stat-number" id="raw-count">0</span>文字
+                    </div>
+                    <div class="stat-line">
+                        入力文字数（空白除く）：<span class="stat-number stat-secondary" id="raw-count-no-space">0</span>文字
+                    </div>
                 </div>
-                <div class="stat-line">
-                    入力文字数（空白除く）：<span class="stat-number stat-secondary" id="raw-count-no-space">0</span>文字
+                <div class="stat-group">
+                    <h3 class="stat-group-title">🎯 レンダリング後文字数</h3>
+                    <div class="stat-line">
+                        レンダリング後文字数：<span class="stat-number stat-primary" id="rendered-count">0</span>文字
+                    </div>
+                    <div class="stat-line">
+                        レンダリング後文字数（空白除く）：<span class="stat-number stat-secondary"
+                            id="rendered-count-no-space">0</span>文字
+                    </div>
                 </div>
             </div>
-            <div class="stat-group">
-                <h3 class="stat-group-title">🎯 レンダリング後文字数</h3>
-                <div class="stat-line">
-                    レンダリング後文字数：<span class="stat-number stat-primary" id="rendered-count">0</span>文字
-                </div>
-                <div class="stat-line">
-                    レンダリング後文字数（空白除く）：<span class="stat-number stat-secondary" id="rendered-count-no-space">0</span>文字
-                </div>
-            </div>
-        </div>
+        </nav>
 
-        <div class="main-content">
-            <div class="input-section">
+        <main class="main-content">
+            <section class="input-section">
                 <h2 class="section-title">📝 マークダウン入力</h2>
+                <label for="markdown-input" class="visually-hidden">マークダウンテキスト入力エリア</label>
                 <textarea id="markdown-input" class="textarea" placeholder="ここにマークダウンテキストを入力してください...
 
 例:
@@ -52,18 +92,18 @@
 
 ```javascript
 console.log('Hello World');
-```"></textarea>
-            </div>
+```" aria-label="マークダウン入力エリア"></textarea>
+            </section>
 
-            <div class="output-section">
+            <section class="output-section">
                 <h2 class="section-title">👀 プレビュー</h2>
-                <div id="preview" class="preview">
+                <div id="preview" class="preview" role="region" aria-label="マークダウンプレビュー表示エリア">
                     <p style="color: #999; text-align: center; margin-top: 50px;">
                         左側にマークダウンを入力すると、ここにプレビューが表示されます
                     </p>
                 </div>
-            </div>
-        </div>
+            </section>
+        </main>
     </div>
 
     <script src="script.js"></script>
