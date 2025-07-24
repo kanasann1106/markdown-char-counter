@@ -22,17 +22,23 @@ Markdown 文書をレンダリング後の正確な文字数で測定するツ�
 
 ### コア技術
 
-- 純粋な HTML/CSS/JavaScript（外部依存なし）
-- クライアントサイド Markdown パース・レンダリング
-- リアルタイムテキスト処理・文字数カウント
+- HTML/CSS/JavaScript（フロントエンドのみ）
+- [Marked.js](https://marked.js.org/) v12.0.0 - Markdown パースライブラリ
+- クライアントサイド処理によるリアルタイム文字数カウント
+- CDN 経由でのライブラリ読み込み
 
 ### アーキテクチャ
 
 ```
-入力(Markdown) → パーサー → HTMLレンダラー → 文字数カウンター
-                              ↓
-                         ライブプレビュー表示
+入力(Markdown) → Marked.js パーサー → HTMLレンダラー → 文字数カウンター
+                                      ↓
+                               ライブプレビュー表示
 ```
+
+### 依存関係
+
+- **Marked.js** (v12.0.0): Markdown → HTML 変換
+  - CDN: `https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js`
 
 ## プロジェクト構造
 
@@ -41,6 +47,9 @@ markdown-char-counter/
 ├── index.html          # メインアプリケーションファイル
 ├── style.css          # レスポンシブCSSスタイル
 ├── script.js          # マークダウン処理・文字数カウントロジック
+├── favicon.ico        # ファビコン
+├── images/            # 画像リソース
+│   └── ogp.png        # OGP画像
 └── README.md          # プロジェクト文書
 ```
 
@@ -49,7 +58,7 @@ markdown-char-counter/
 ### セットアップ
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/kanasann1106/markdown-char-counter.git
 cd markdown-char-counter
 ```
 
