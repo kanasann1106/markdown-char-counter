@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>マークダウン文字数カウントツール</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 50% 50%;
+            gap: 0;
+            min-height: 600px;
+            overflow: hidden;
+        }
+
+        .input-section,
+        .output-section {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .input-section {
+            border-right: 1px solid #eee;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .textarea {
+            flex: 1;
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
+            padding: 15px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            resize: none;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .textarea:focus {
+            border-color: #667eea;
+        }
+
+        .preview {
+            flex: 1;
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
+            padding: 15px;
+            background: #fafafa;
+            overflow: auto;
+            max-height: 820px;
+            font-size: 14px;
+            line-height: 1.6;
+            min-width: 0;
+        }
+
+        .stats-header {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e1e5e9;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .stat-group {
+            text-align: left;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-group-title {
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .stat-line {
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .stat-line:last-child {
+            margin-bottom: 0;
+        }
+
+        .stat-number {
+            font-weight: 700;
+            color: #333;
+            font-size: 1.2em;
+        }
+
+        .stat-number.stat-primary {
+            color: #667eea;
+            font-size: 1.4em;
+        }
+
+        .stat-number.stat-secondary {
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .stat-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .stat-label {
+            color: #666;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .rendered-count {
+            color: #667eea;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .input-section {
+                border-right: none;
+                border-bottom: 1px solid #eee;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .container {
+                margin: 10px;
+                width: calc(100% - 20px);
+            }
+
+            .stats-header {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                padding: 15px;
+            }
+
+            .stat-group {
+                padding: 12px;
+            }
+
+            .stat-number {
+                font-size: 1.5rem;
+            }
+
+            .stat-number.stat-primary {
+                font-size: 1.7rem;
+            }
+
+            .stat-number.stat-secondary {
+                font-size: 1rem;
+            }
+        }
+
+        /* プレビュー内のマークダウンスタイル */
+        .preview h1,
+        .preview h2,
+        .preview h3,
+        .preview h4,
+        .preview h5,
+        .preview h6 {
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        .preview h1 {
+            font-size: 2em;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .preview h2 {
+            font-size: 1.5em;
+        }
+
+        .preview h3 {
+            font-size: 1.25em;
+        }
+
+        .preview p {
+            margin-bottom: 16px;
+        }
+
+        .preview ul,
+        .preview ol {
+            margin-bottom: 16px;
+            padding-left: 30px;
+        }
+
+        .preview li {
+            margin-bottom: 4px;
+        }
+
+        .preview blockquote {
+            border-left: 4px solid #ddd;
+            padding-left: 16px;
+            margin: 16px 0;
+            color: #666;
+        }
+
+        .preview code {
+            background: #f1f3f4;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        .preview pre {
+            background: #f6f8fa;
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin-bottom: 16px;
+            white-space: pre;
+            border: 1px solid #ddd;
+            max-width: 100%;
+            word-wrap: normal;
+        }
+
+        .preview pre code {
+            background: none;
+            padding: 0;
+            white-space: pre;
+            word-break: normal;
+            word-wrap: normal;
+        }
+
+        .preview table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 16px;
+        }
+
+        .preview th,
+        .preview td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        .preview th {
+            background: #f1f3f4;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>📝 マークダウン文字数カウントツール</h1>
+            <p>マークダウンをレンダリング後の文字数を正確にカウントします</p>
+        </header>
+
+        <div class="stats-header">
+            <div class="stat-group">
+                <h3 class="stat-group-title">📝 入力文字数</h3>
+                <div class="stat-line">
+                    入力文字数：<span class="stat-number" id="raw-count">0</span>文字
+                </div>
+                <div class="stat-line">
+                    入力文字数（空白除く）：<span class="stat-number stat-secondary" id="raw-count-no-space">0</span>文字
+                </div>
+            </div>
+            <div class="stat-group">
+                <h3 class="stat-group-title">🎯 レンダリング後文字数</h3>
+                <div class="stat-line">
+                    レンダリング後文字数：<span class="stat-number stat-primary" id="rendered-count">0</span>文字
+                </div>
+                <div class="stat-line">
+                    レンダリング後文字数（空白除く）：<span class="stat-number stat-secondary" id="rendered-count-no-space">0</span>文字
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <h2 class="section-title">📝 マークダウン入力</h2>
+                <textarea id="markdown-input" class="textarea" placeholder="ここにマークダウンテキストを入力してください...
+
+例:
+# 見出し1
+これは**太字**です。
+- リスト項目1
+- リスト項目2
+
+> 引用文です。
+
+```javascript
+console.log('Hello World');
+```"></textarea>
+            </div>
+
+            <div class="output-section">
+                <h2 class="section-title">👀 プレビュー</h2>
+                <div id="preview" class="preview">
+                    <p style="color: #999; text-align: center; margin-top: 50px;">
+                        左側にマークダウンを入力すると、ここにプレビューが表示されます
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const markdownInput = document.getElementById('markdown-input');
+        const preview = document.getElementById('preview');
+        const rawCount = document.getElementById('raw-count');
+        const rawCountNoSpace = document.getElementById('raw-count-no-space');
+        const renderedCount = document.getElementById('rendered-count');
+        const renderedCountNoSpace = document.getElementById('rendered-count-no-space');
+
+        // HTMLタグを除去してテキストのみを取得する関数
+        function getTextContent(html) {
+            const div = document.createElement('div');
+            div.innerHTML = html;
+            return div.textContent || div.innerText || '';
+        }
+
+        // 文字数をカウントする関数
+        function updateCounts() {
+            const rawText = markdownInput.value;
+            const rawTextLength = rawText.length;
+            const rawTextNoSpaceLength = rawText.replace(/\s/g, '').length;
+
+            if (rawText.trim() === '') {
+                preview.innerHTML = '<p style="color: #999; text-align: center; margin-top: 50px;">左側にマークダウンを入力すると、ここにプレビューが表示されます</p>';
+                rawCount.textContent = '0';
+                rawCountNoSpace.textContent = '0';
+                renderedCount.textContent = '0';
+                renderedCountNoSpace.textContent = '0';
+                return;
+            }
+
+            // マークダウンをHTMLに変換
+            const htmlContent = marked.parse(rawText);
+            preview.innerHTML = htmlContent;
+
+            // レンダリング後のテキストを取得
+            const renderedText = getTextContent(htmlContent);
+            const renderedTextLength = renderedText.length;
+            const renderedTextNoSpaceLength = renderedText.replace(/\s/g, '').length;
+
+            // カウント結果を更新
+            rawCount.textContent = rawTextLength.toLocaleString();
+            rawCountNoSpace.textContent = rawTextNoSpaceLength.toLocaleString();
+            renderedCount.textContent = renderedTextLength.toLocaleString();
+            renderedCountNoSpace.textContent = renderedTextNoSpaceLength.toLocaleString();
+        }
+
+        // 入力時にリアルタイムで更新
+        markdownInput.addEventListener('input', updateCounts);
+
+        // 初期化
+        updateCounts();
+
+        // サンプルテキストを設定
+        markdownInput.value = `# サンプルマークダウン
+
+これは**マークダウン文字数カウントツール**のサンプルです。
+
+## 特徴
+
+- マークダウンをリアルタイムでプレビュー
+- レンダリング後の正確な文字数を計算
+- シンプルで使いやすいUI
+
+### コードブロックの例
+
+\`\`\`javascript
+function hello() {
+    console.log("Hello, World!");
+}
+\`\`\`
+
+> これは引用文です。
+> マークダウン記法を使って書かれています。
+
+1. 番号付きリスト
+2. アイテム2
+3. アイテム3
+
+**太字**や*斜体*、~~取り消し線~~なども正確にカウントされます。
+
+[リンクテキスト](https://example.com)
+
+| 項目 | 説明 |
+|------|------|
+| HTML | マークアップ言語 |
+| CSS | スタイルシート |
+| JS | プログラミング言語 |`;
+
+        // サンプルテキストでカウントを更新
+        updateCounts();
+    </script>
+</body>
+
+</html>
