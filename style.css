@@ -90,6 +90,8 @@ body {
     resize: none;
     outline: none;
     transition: border-color 0.3s ease;
+    overflow: auto;
+    max-height: 520px;
 }
 
 .textarea:focus {
@@ -103,7 +105,7 @@ body {
     padding: 15px;
     background: #fafafa;
     overflow: auto;
-    max-height: 820px;
+    max-height: 520px;
     font-size: 14px;
     line-height: 1.6;
     min-width: 0;

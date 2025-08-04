@@ -43,6 +43,40 @@ function updateCounts() {
     renderedCountNoSpace.textContent = renderedTextNoSpaceLength.toLocaleString();
 }
 
+// スクロール同期用のフラグ
+let isScrollSyncing = false;
+
+// スクロール同期機能
+function syncScroll(sourceElement, targetElement) {
+    if (isScrollSyncing) return;
+    
+    isScrollSyncing = true;
+    
+    const sourceScrollTop = sourceElement.scrollTop;
+    const sourceScrollHeight = sourceElement.scrollHeight - sourceElement.clientHeight;
+    const scrollRatio = sourceScrollHeight > 0 ? sourceScrollTop / sourceScrollHeight : 0;
+    
+    const targetScrollHeight = targetElement.scrollHeight - targetElement.clientHeight;
+    const targetScrollTop = Math.round(scrollRatio * targetScrollHeight);
+    
+    targetElement.scrollTop = targetScrollTop;
+    
+    // 少し遅延してフラグをリセット
+    setTimeout(() => {
+        isScrollSyncing = false;
+    }, 10);
+}
+
+// 入力エリアのスクロールイベント
+markdownInput.addEventListener('scroll', () => {
+    syncScroll(markdownInput, preview);
+});
+
+// プレビューエリアのスクロールイベント
+preview.addEventListener('scroll', () => {
+    syncScroll(preview, markdownInput);
+});
+
 // 入力時にリアルタイムで更新
 markdownInput.addEventListener('input', updateCounts);
 
